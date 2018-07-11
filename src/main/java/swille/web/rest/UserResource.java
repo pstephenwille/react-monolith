@@ -1,24 +1,38 @@
 package swille.web.rest;
 
-import swille.config.Constants;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+
 import com.codahale.metrics.annotation.Timed;
-import swille.security.AuthoritiesConstants;
-import swille.service.UserService;
-import swille.service.dto.UserDTO;
-import swille.web.rest.util.PaginationUtil;
-import io.github.jhipster.web.util.ResponseUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+
+import io.github.jhipster.web.util.ResponseUtil;
+import swille.config.Constants;
+import swille.security.AuthoritiesConstants;
+import swille.service.UserService;
+import swille.service.dto.UserDTO;
+import swille.web.rest.util.PaginationUtil;
+
 
 /**
  * REST controller for managing users.
@@ -48,13 +62,52 @@ import java.util.*;
 @RequestMapping("/api")
 public class UserResource {
 
+    private static HttpTransport transport = new NetHttpTransport();
+    private static final JacksonFactory jacksonFactory = new JacksonFactory();
     private final Logger log = LoggerFactory.getLogger(UserResource.class);
-
     private final UserService userService;
+    @Value("${google.oauth2.tokeninfo.url}") private String tokenUrl;
+    @Value("${google.oauth2.client-id}") private String clientId;
 
     public UserResource(UserService userService) {
-
         this.userService = userService;
+    }
+
+    /*
+    * https://accounts.google.com/o/oauth2/token
+code=4/X9lG6uWd8-MMJPElWggHZRzyFKtp.QubAT_P-GEwePvB8fYmgkJzntDnaiAI
+&client_id={ClientId}.apps.googleusercontent.com
+&client_secret={ClientSecret}
+&redirect_uri=urn:ietf:wg:oauth:2.0:oob
+&grant_type=authorization_code
+*/
+    @PutMapping("/gapi/token/{id}/{access}")
+    public String handleToken(@PathVariable String id, @PathVariable String access)
+        throws Exception {
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jacksonFactory)
+            .setAudience(Collections.singleton(clientId))
+            .build();
+
+        GoogleIdToken idToken = verifier.verify(id);
+
+        if (idToken != null) {
+            GoogleIdToken.Payload payload = idToken.getPayload();
+
+
+            if(payload.get("aud").equals(clientId)){
+                System.out.println((char)27 + "[30;43m"+ "aud is good" +(char)27+"[0m");
+                // if valid, create session for user
+            }
+        }
+
+        return "woot";
+    }
+
+    @GetMapping("/gapi/photos")
+    public String redirect(){
+        System.out.println((char)27 + "[30;43m"+ "gapi photos" +(char)27+"[0m");
+        return "good redirect";
     }
 
     /**

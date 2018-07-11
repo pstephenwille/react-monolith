@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
+import { FAILURE, REQUEST, SUCCESS } from 'app/shared/reducers/action-type.util';
 
 export const ACTION_TYPES = {
+  PUT_GAPI_TOKEN: 'administration/PUT_GAPI_TOKEN',
   FETCH_GATEWAY_ROUTE: 'administration/FETCH_GATEWAY_ROUTE',
   FETCH_LOGS: 'administration/FETCH_LOGS',
   FETCH_LOGS_CHANGE_LEVEL: 'administration/FETCH_LOGS_CHANGE_LEVEL',
@@ -40,6 +41,7 @@ export type AdministrationState = Readonly<typeof initialState>;
 
 export default (state: AdministrationState = initialState, action): AdministrationState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.PUT_GAPI_TOKEN):
     case REQUEST(ACTION_TYPES.FETCH_GATEWAY_ROUTE):
     case REQUEST(ACTION_TYPES.FETCH_METRICS):
       return {
@@ -127,7 +129,7 @@ export default (state: AdministrationState = initialState, action): Administrati
         ...state,
         loading: false,
         audits: action.payload.data,
-        totalItems: action.payload.headers['x-total-count']
+        totalItems: action.payload.headers[ 'x-total-count' ]
       };
     case SUCCESS(ACTION_TYPES.FETCH_HEALTH):
       return {
@@ -139,6 +141,11 @@ export default (state: AdministrationState = initialState, action): Administrati
       return state;
   }
 };
+
+export const gapiToken = (id, access) => ({
+  type: ACTION_TYPES.PUT_GAPI_TOKEN,
+  payload: axios.put(`/api/gapi/token/${id}/${access}`)
+});
 
 // Actions
 export const gatewayRoutes = () => ({

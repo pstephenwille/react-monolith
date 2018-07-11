@@ -131,4 +131,8 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+google:
+    oauth2:
+        client-id: 537652529956-khsvspnniq7j3l45qkildh8mu0nl852d.apps.googleusercontent.com
+        tokeninfo:
+            url: https://www.googleapis.com/oauth2/v3/tokeninfo
