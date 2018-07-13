@@ -1,13 +1,29 @@
 package swille.web.rest;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.FileList;
+import com.google.api.services.photoslibrary.v1.PhotosLibrary;
+import com.google.api.services.photoslibrary.v1.model.MediaItem;
+import com.google.api.services.photoslibrary.v1.model.SearchMediaItemsRequest;
+import com.google.api.services.photoslibrary.v1.model.SearchMediaItemsResponse;
 
 import com.codahale.metrics.annotation.Timed;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,12 +35,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import io.github.jhipster.web.util.ResponseUtil;
 import swille.config.Constants;
@@ -62,12 +85,11 @@ import swille.web.rest.util.PaginationUtil;
 @RequestMapping("/api")
 public class UserResource {
 
-    private static HttpTransport transport = new NetHttpTransport();
-    private static final JacksonFactory jacksonFactory = new JacksonFactory();
     private final Logger log = LoggerFactory.getLogger(UserResource.class);
     private final UserService userService;
     @Value("${google.oauth2.tokeninfo.url}") private String tokenUrl;
     @Value("${google.oauth2.client-id}") private String clientId;
+    @Value("${google.oauth2.secret}") private String secret;
 
     public UserResource(UserService userService) {
         this.userService = userService;
@@ -82,10 +104,13 @@ code=4/X9lG6uWd8-MMJPElWggHZRzyFKtp.QubAT_P-GEwePvB8fYmgkJzntDnaiAI
 &grant_type=authorization_code
 */
     @PutMapping("/gapi/token/{id}/{access}")
-    public String handleToken(@PathVariable String id, @PathVariable String access)
+    public String handleToken(@PathVariable String id, @PathVariable String access, HttpServletResponse response)
         throws Exception {
+        final String SCOPE = "https://www.googleapis.com/auth/drive";
+        final HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        final JacksonFactory jacksonFactory = JacksonFactory.getDefaultInstance();
 
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jacksonFactory)
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(httpTransport, jacksonFactory)
             .setAudience(Collections.singleton(clientId))
             .build();
 
@@ -94,20 +119,95 @@ code=4/X9lG6uWd8-MMJPElWggHZRzyFKtp.QubAT_P-GEwePvB8fYmgkJzntDnaiAI
         if (idToken != null) {
             GoogleIdToken.Payload payload = idToken.getPayload();
 
-
-            if(payload.get("aud").equals(clientId)){
-                System.out.println((char)27 + "[30;43m"+ "aud is good" +(char)27+"[0m");
+            if (payload.get("aud").equals(clientId)) {
+                System.out.println((char) 27 + "[30;43m" + "aud is good" + (char) 27 + "[0m");
                 // if valid, create session for user
             }
         }
+        /* service account creds */
+        GoogleCredential credential = new GoogleCredential().setAccessToken(access);
+        GoogleCredential creds = new GoogleCredential.Builder()
+            .setTransport(httpTransport)
+            .setJsonFactory(jacksonFactory)
+            .setClientSecrets(clientId, secret)
+            .build();
+
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets
+            .load(jacksonFactory, new InputStreamReader(this.getClass().getResourceAsStream("/gapi.json")));
+
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+            httpTransport,
+            jacksonFactory,
+            clientSecrets,
+            Collections.singleton("https://www.googleapis.com/auth/drive")
+        ).build();
+        String url = "https://photoslibrary.googleapis.com/v1/albums";
+        HttpGet get = new HttpGet(url);
+        get.addHeader("Authorization", "Bearer" + " " + access);
+        get.addHeader("ClientId", clientId);
+        get.addHeader("ClientSecret", secret);
+        get.addHeader("scope", SCOPE);
+        CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse resp = client.execute(get);
+        String json = EntityUtils.toString(resp.getEntity());
+
+        System.out.println((char) 27 + "[30;43m" + json + (char) 27 + "[0m");
+        /*
+         * https://accounts.google.com/o/oauth2/v2/auth
+         * ?response_type=code
+         * &redirect_uri=http%3A%2F%2F127.0.0.1%3A8080%2Fauth%2Fgoogle%2Fcallback
+         * &scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fphotoslibrary.readonly%20profile
+         * &client_id=537652529956-0srdv7nl4bt6iotvq2jfko3darf4bgsf.apps.googleusercontent.com
+         * */
 
         return "woot";
     }
 
-    @GetMapping("/gapi/photos")
-    public String redirect(){
-        System.out.println((char)27 + "[30;43m"+ "gapi photos" +(char)27+"[0m");
-        return "good redirect";
+    @PostMapping("/gapi/code")
+    public String redirect(
+        @RequestBody Map<String, String> json, final HttpServletRequest req, final HttpServletResponse resp) throws
+                                                                                                             Exception {
+
+        final String code = json.get("code");
+        final HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        final JacksonFactory jacksonFactory = JacksonFactory.getDefaultInstance();
+        final String accessToken, refreshToken;
+
+        GoogleTokenResponse token = new GoogleAuthorizationCodeTokenRequest(
+            httpTransport,
+            jacksonFactory,
+            "https://www.googleapis.com/oauth2/v4/token",
+            clientId,
+            secret,
+            code,
+            "http://localhost:8080").execute();
+
+        accessToken = token.getAccessToken();
+        refreshToken = token.getRefreshToken();
+
+        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+
+        SearchMediaItemsRequest searchMediaItemsRequest = new SearchMediaItemsRequest();
+
+        PhotosLibrary photosLibrary = new PhotosLibrary.Builder(httpTransport, jacksonFactory, credential)
+            .setApplicationName("photos2").build();
+
+        SearchMediaItemsResponse items = photosLibrary.mediaItems().search(searchMediaItemsRequest).execute();
+        List<MediaItem> photos = items.getMediaItems();
+
+        return "good token ";
+    }
+
+    public String handleAccessToken(String accessToken, String refreshToken) throws Exception {
+        final HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        final JacksonFactory jacksonFactory = JacksonFactory.getDefaultInstance();
+        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+
+        Drive drive = new Drive.Builder(httpTransport, jacksonFactory, credential).setApplicationName("photos2")
+            .build();
+        FileList files = drive.files().list().execute();
+
+        return "access token";
     }
 
     /**
