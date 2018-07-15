@@ -1,5 +1,6 @@
 package swille.service.mapper;
 
+import swille.domain.Album;
 import swille.domain.Authority;
 import swille.domain.User;
 import swille.service.dto.UserDTO;
@@ -46,6 +47,8 @@ public class UserMapper {
             if (authorities != null) {
                 user.setAuthorities(authorities);
             }
+
+            user.setAlbums(userDTO.getAlbums());
             return user;
         }
     }
@@ -73,4 +76,9 @@ public class UserMapper {
             return auth;
         }).collect(Collectors.toSet());
     }
+
+//    public List<Album> setAlbums(List<Album> albums) {
+//        albums.stream().map(prop->{
+//            Album album = new Album()
+//        })
 }

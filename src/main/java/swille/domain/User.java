@@ -1,28 +1,34 @@
 package swille.domain;
 
-import swille.config.Constants;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.apache.commons.lang3.StringUtils;
-import javax.validation.constraints.Email;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import swille.config.Constants;
 
 /**
  * A user.
  */
 
-@org.springframework.data.mongodb.core.mapping.Document(collection = "jhi_user")
+@Document(collection = "jhi_user")
 public class User extends AbstractAuditingEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,7 +37,8 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     @NotNull
     @Pattern(regexp = Constants.LOGIN_REGEX)
-    @Size(min = 1, max = 50)
+    @Size(min = 1,
+          max = 50)
     @Indexed
     private String login;
 
@@ -44,13 +51,15 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private String lastName;
 
     @Email
-    @Size(min = 5, max = 254)
+    @Size(min = 5,
+          max = 254)
     @Indexed
     private String email;
 
     private boolean activated = false;
 
-    @Size(min = 2, max = 6)
+    @Size(min = 2,
+          max = 6)
     @Field("lang_key")
     private String langKey;
 
@@ -58,15 +67,23 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Field("image_url")
     private String imageUrl;
 
+
+    @Field("albums")/* not included in this.toString() */
+    private List<Album> albums = new ArrayList<>();
+
     @JsonIgnore
     private Set<Authority> authorities = new HashSet<>();
 
-    public String getId() {
-        return id;
+    public List<Album> getAlbums() {
+        return albums;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setAlbums(List<Album> albums) {
+        this.albums = albums;
+    }
+
+    public void addAlbum(Album album) {
+        this.getAlbums().add(album);
     }
 
     public String getLogin() {
@@ -135,6 +152,11 @@ public class User extends AbstractAuditingEntity implements Serializable {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -148,20 +170,23 @@ public class User extends AbstractAuditingEntity implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(getId());
-    }
-
-    @Override
     public String toString() {
         return "User{" +
-            "login='" + login + '\'' +
-            ", firstName='" + firstName + '\'' +
-            ", lastName='" + lastName + '\'' +
-            ", email='" + email + '\'' +
-            ", imageUrl='" + imageUrl + '\'' +
-            ", activated='" + activated + '\'' +
-            ", langKey='" + langKey + '\'' +
-            "}";
+               "login='" + login + '\'' +
+               ", firstName='" + firstName + '\'' +
+               ", lastName='" + lastName + '\'' +
+               ", email='" + email + '\'' +
+               ", imageUrl='" + imageUrl + '\'' +
+               ", activated='" + activated + '\'' +
+               ", langKey='" + langKey + '\'' +
+               "}";
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

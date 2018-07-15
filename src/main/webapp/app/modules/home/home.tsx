@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { Alert, Col, Row } from 'reactstrap';
 import { getSession } from 'app/shared/reducers/authentication';
 import { getLoginUrl } from 'app/shared/util/url-utils';
-import { gapiToken, postGapiToken } from '../administration/administration.reducer'
+import { postGapiCode, getPhotosList } from '../administration/administration.reducer'
 
 export interface IHomeProp extends StateProps, DispatchProps {}
 
@@ -20,6 +20,7 @@ export class Home extends React.Component<IHomeProp> {
     this.signInToGoogle = this.signInToGoogle.bind(this);
     this.revokeGapi = this.revokeGapi.bind(window);
     this.getGapiCode = this.getGapiCode.bind(this);
+    this.getPhotosList = this.getPhotosList.bind(this);
   }
 
   componentDidMount() {
@@ -53,30 +54,7 @@ export class Home extends React.Component<IHomeProp> {
       console.log('auth2:', data);
       window.GoogleAuth = window.gapi.auth2.getAuthInstance();
     });
-
-    // $.ajax({
-    //   url: 'https://accounts.google.com/o/oauth2/auth',
-    //   method: 'POST',
-    //   data: {
-    //     scope: 'https://www.googleapis.com/auth/drive',
-    //     client_id: '537652529956-khsvspnniq7j3l45qkildh8mu0nl852d.apps.googleusercontent.com',
-    //     responst_type: 'code',
-    //     redirect_url: 'http://localhost:8080/api/gapi/photos',
-    //     access_type: 'offline',
-    //     crossDomain:true
-    //   }
-    // }).done(data => console.log('..oauth: ', data));
-
   }
-
-  // postGapiToken() {
-  //   const token = window.gapi.auth.getToken();
-
-  // fetch(`/api/token/${token.id_token}/${token.access_token}`)
-  //   .then(data => {
-  //     console.log('token then ', data);
-  //   })
-  // }
 
   signInToGoogle() {
     if (!window.GoogleAuth) return;
@@ -97,12 +75,16 @@ export class Home extends React.Component<IHomeProp> {
     (window.GoogleAuth) ? window.GoogleAuth.disconnect() : null;
   }
 
+  getPhotosList(){
+    this.props.getPhotosList().then(data=>console.log('...photos ', data))
+  }
+
   getGapiCode() {
     let self = this;
     window.GoogleAuth.grantOfflineAccess({
       scope: SCOPE
     }).then(data => {
-      self.props.postGapiToken(data.code).then(data => console.log('..resp:', data));
+      self.props.postGapiCode(data.code).then(data => console.log('..resp:', data));
     });
   }
 
@@ -121,6 +103,7 @@ export class Home extends React.Component<IHomeProp> {
             <button id="gapi-signin" onClick={this.signInToGoogle}>Sign in/out of Google</button>
             <button id="gapi-revoke" onClick={this.revokeGapi}>Revoke Google perms</button>
             <button id="gapi-code" onClick={this.getGapiCode}>Get Access Code</button>
+            <button id="gapi-code" onClick={this.getPhotosList}>Get Photos List</button>
           </div>
 
           {account && account.login ? (
@@ -162,7 +145,7 @@ const mapStateToProps = storeState => ({
   isAuthenticated: storeState.authentication.isAuthenticated
 });
 
-const mapDispatchToProps = { getSession, gapiToken, postGapiToken };
+const mapDispatchToProps = { getSession, postGapiCode, getPhotosList };
 
 type StateProps = ReturnType<typeof mapStateToProps>;
 type DispatchProps = typeof mapDispatchToProps;

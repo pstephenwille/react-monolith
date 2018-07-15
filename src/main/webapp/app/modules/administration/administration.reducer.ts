@@ -3,8 +3,8 @@ import axios from 'axios';
 import { FAILURE, REQUEST, SUCCESS } from 'app/shared/reducers/action-type.util';
 
 export const ACTION_TYPES = {
-  POST_GAPI_TOKEN: 'administration/POST_GAPI_TOKEN',
-  PUT_GAPI_TOKEN: 'administration/PUT_GAPI_TOKEN',
+  GET_PHOTOS_LIST: 'administration/GET_PHOTOS_LIST',
+  POST_GAPI_CODE: 'administration/POST_GAPI_CODE',
   FETCH_GATEWAY_ROUTE: 'administration/FETCH_GATEWAY_ROUTE',
   FETCH_LOGS: 'administration/FETCH_LOGS',
   FETCH_LOGS_CHANGE_LEVEL: 'administration/FETCH_LOGS_CHANGE_LEVEL',
@@ -42,8 +42,8 @@ export type AdministrationState = Readonly<typeof initialState>;
 
 export default (state: AdministrationState = initialState, action): AdministrationState => {
   switch (action.type) {
-    case REQUEST(ACTION_TYPES.POST_GAPI_TOKEN):
-    case REQUEST(ACTION_TYPES.PUT_GAPI_TOKEN):
+    case REQUEST(ACTION_TYPES.GET_PHOTOS_LIST):
+    case REQUEST(ACTION_TYPES.POST_GAPI_CODE):
     case REQUEST(ACTION_TYPES.FETCH_GATEWAY_ROUTE):
     case REQUEST(ACTION_TYPES.FETCH_METRICS):
       return {
@@ -143,13 +143,15 @@ export default (state: AdministrationState = initialState, action): Administrati
       return state;
   }
 };
-export const postGapiToken = (code) => ({
-  type: ACTION_TYPES.POST_GAPI_TOKEN,
-  payload: axios.post(`/api/gapi/code`, {code})
+
+export const getPhotosList = () => ({
+  type: ACTION_TYPES.GET_PHOTOS_LIST,
+  payload: axios.get('/gapi/photos/list')
 });
-export const gapiToken = (id, access) => ({
-  type: ACTION_TYPES.PUT_GAPI_TOKEN,
-  payload: axios.put(`/api/gapi/token/${id}/${access}`)
+
+export const postGapiCode = (code) => ({
+  type: ACTION_TYPES.POST_GAPI_CODE,
+  payload: axios.post(`/gapi/code`, {code})
 });
 
 // Actions

@@ -241,6 +241,11 @@
             <version>v3-rev54-1.20.0</version>
         </dependency>
         <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-photoslibrary</artifactId>
             <version>v1-rev1-1.22.0</version>
