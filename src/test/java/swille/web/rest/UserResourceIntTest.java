@@ -1,16 +1,5 @@
 package swille.web.rest;
 
-import swille.ReactMonolithApp;
-import swille.domain.Authority;
-import swille.domain.User;
-import swille.repository.UserRepository;
-import swille.security.AuthoritiesConstants;
-
-import swille.service.UserService;
-import swille.service.dto.UserDTO;
-import swille.service.mapper.UserMapper;
-import swille.web.rest.errors.ExceptionTranslator;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,13 +15,28 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+import swille.ReactMonolithApp;
+import swille.domain.Authority;
+import swille.domain.User;
+import swille.repository.UserRepository;
+import swille.security.AuthoritiesConstants;
+import swille.service.UserService;
+import swille.service.dto.UserDTO;
+import swille.service.mapper.UserMapper;
+import swille.web.rest.errors.ExceptionTranslator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class for the UserResource REST controller.
@@ -85,7 +89,7 @@ public class UserResourceIntTest {
     private User user;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).clear();
         cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE).clear();

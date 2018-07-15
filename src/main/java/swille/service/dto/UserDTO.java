@@ -2,6 +2,7 @@ package swille.service.dto;
 
 import swille.config.Constants;
 
+import swille.domain.Album;
 import swille.domain.Authority;
 import swille.domain.User;
 
@@ -9,7 +10,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 import javax.validation.constraints.*;
+
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,7 +25,8 @@ public class UserDTO {
 
     @NotBlank
     @Pattern(regexp = Constants.LOGIN_REGEX)
-    @Size(min = 1, max = 50)
+    @Size(min = 1,
+          max = 50)
     private String login;
 
     @Size(max = 50)
@@ -32,7 +36,8 @@ public class UserDTO {
     private String lastName;
 
     @Email
-    @Size(min = 5, max = 254)
+    @Size(min = 5,
+          max = 254)
     private String email;
 
     @Size(max = 256)
@@ -40,7 +45,8 @@ public class UserDTO {
 
     private boolean activated = false;
 
-    @Size(min = 2, max = 6)
+    @Size(min = 2,
+          max = 6)
     private String langKey;
 
     private String createdBy;
@@ -52,6 +58,8 @@ public class UserDTO {
     private Instant lastModifiedDate;
 
     private Set<String> authorities;
+
+    private List<Album> albums;
 
     public UserDTO() {
         // Empty constructor needed for Jackson.
@@ -73,6 +81,15 @@ public class UserDTO {
         this.authorities = user.getAuthorities().stream()
             .map(Authority::getName)
             .collect(Collectors.toSet());
+        this.albums = user.getAlbums();
+    }
+
+    public List<Album> getAlbums() {
+        return albums;
+    }
+
+    public void setAlbums(List<Album> albums) {
+        this.albums = albums;
     }
 
     public String getId() {
@@ -182,18 +199,18 @@ public class UserDTO {
     @Override
     public String toString() {
         return "UserDTO{" +
-            "login='" + login + '\'' +
-            ", firstName='" + firstName + '\'' +
-            ", lastName='" + lastName + '\'' +
-            ", email='" + email + '\'' +
-            ", imageUrl='" + imageUrl + '\'' +
-            ", activated=" + activated +
-            ", langKey='" + langKey + '\'' +
-            ", createdBy=" + createdBy +
-            ", createdDate=" + createdDate +
-            ", lastModifiedBy='" + lastModifiedBy + '\'' +
-            ", lastModifiedDate=" + lastModifiedDate +
-            ", authorities=" + authorities +
-            "}";
+               "login='" + login + '\'' +
+               ", firstName='" + firstName + '\'' +
+               ", lastName='" + lastName + '\'' +
+               ", email='" + email + '\'' +
+               ", imageUrl='" + imageUrl + '\'' +
+               ", activated=" + activated +
+               ", langKey='" + langKey + '\'' +
+               ", createdBy=" + createdBy +
+               ", createdDate=" + createdDate +
+               ", lastModifiedBy='" + lastModifiedBy + '\'' +
+               ", lastModifiedDate=" + lastModifiedDate +
+               ", authorities=" + authorities +
+               "}";
     }
 }

@@ -1,5 +1,6 @@
 package swille.config.dbmigrations;
 
+import swille.domain.Album;
 import swille.domain.Authority;
 import swille.domain.User;
 import swille.security.AuthoritiesConstants;
@@ -9,6 +10,7 @@ import com.github.mongobee.changeset.ChangeSet;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.time.Instant;
+import java.util.ArrayList;
 
 /**
  * Creates the initial database setup
@@ -22,6 +24,7 @@ public class InitialSetupMigration {
         adminAuthority.setName(AuthoritiesConstants.ADMIN);
         Authority userAuthority = new Authority();
         userAuthority.setName(AuthoritiesConstants.USER);
+
         mongoTemplate.save(adminAuthority);
         mongoTemplate.save(userAuthority);
     }
