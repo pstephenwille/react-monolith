@@ -135,7 +135,16 @@ google:
     oauth2:
         client-id: 537652529956-khsvspnniq7j3l45qkildh8mu0nl852d.apps.googleusercontent.com
         secret: D3xHEX4b3qG3nZyrTWTzizxw
+        callback-uri: http://localhost:8080/gapi/auth/code
         key: AIzaSyC62MsDg-Ob7kpajJTZ5e4wN1w7Kq-Jmy4
+        scopes: profile https://www.googleapis.com/auth/photoslibrary.readonly
         tokeninfo:
             url: https://www.googleapis.com/oauth2/v3/tokeninfo
             auth-code-url: https://www.googleapis.com/oauth2/v4/token
+# https://accounts.google.com/o/oauth2/v2/auth
+#callbackurl:
+#clientId:
+#secret:
+#tokenUrl:
+
+#userProfileUrl:https://www.googleapis.com/plus/v1/people/me

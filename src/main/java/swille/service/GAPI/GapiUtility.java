@@ -1,5 +1,6 @@
 package swille.service.GAPI;
 
+import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -20,6 +21,11 @@ import swille.web.rest.UserResource;
 public class GapiUtility {
 
     private final Logger log = LoggerFactory.getLogger(UserResource.class);
+
+    public GoogleClientSecrets getClientSecrets() {
+        return clientSecrets;
+    }
+
     private GoogleClientSecrets clientSecrets;
 
 
@@ -27,12 +33,15 @@ public class GapiUtility {
     @Value("${google.oauth2.tokeninfo.auth-code-url}")
     private String codeAuthUri;
 
+    @Value("${google.oauth2.callback-uri}")
+    private String callbackUri;
+
     public GapiUtility() {
         try {
             this.clientSecrets = GoogleClientSecrets.load(
                 JacksonFactory.getDefaultInstance(),
                 new InputStreamReader(this.getClass()
-                                          .getResourceAsStream("/private/photos2.gapi.json")));
+                    .getResourceAsStream("/private/photos2.gapi.json")));
         } catch (Exception e) {
             log.error("G-clientSecrets failed:", e);
         }
@@ -48,7 +57,7 @@ public class GapiUtility {
                 this.clientSecrets.getDetails().getClientId(),
                 this.clientSecrets.getDetails().getClientSecret(),
                 code,
-                "http://localhost:8080").execute();
+                callbackUri).execute();
 
             this.credential = new GoogleCredential().setAccessToken(token.getAccessToken());
 

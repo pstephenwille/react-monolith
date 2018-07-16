@@ -6,86 +6,31 @@ import { connect } from 'react-redux';
 import { Alert, Col, Row } from 'reactstrap';
 import { getSession } from 'app/shared/reducers/authentication';
 import { getLoginUrl } from 'app/shared/util/url-utils';
-import { postGapiCode, getPhotosList } from '../administration/administration.reducer'
+import { getPhotosList, getGoogleLogin } from '../administration/administration.reducer'
 
 export interface IHomeProp extends StateProps, DispatchProps {}
 
 const SCOPE = 'profile email https://www.googleapis.com/auth/photoslibrary';
+
 // const SCOPE = 'profile email https://www.googleapis.com/auth/drive';
 
 export class Home extends React.Component<IHomeProp> {
   constructor() {
     super();
-    this.intiGapiClient = this.intiGapiClient.bind(this);
-    this.signInToGoogle = this.signInToGoogle.bind(this);
-    this.revokeGapi = this.revokeGapi.bind(window);
-    this.getGapiCode = this.getGapiCode.bind(this);
     this.getPhotosList = this.getPhotosList.bind(this);
+    this.loginToGoogle = this.loginToGoogle.bind(this);
   }
 
   componentDidMount() {
     this.props.getSession();
-    this.loadGapi();
   }
 
-  loadGapi() {
-    window.gapi.load('client:auth2', this.intiGapiClient);
+  getPhotosList() {
+    this.props.getPhotosList().then(data => console.log('...photos ', data))
   }
 
-  intiGapiClient() {
-    const OauthUrl = 'https://accounts.google.com/o/oauth2/auth';
-    const discoveryUrl = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
-    // window.gapi.client.init({
-    //   'apiKey': 'photos2',
-    //   'discoveryDocs': [],
-    //   'clientId': '537652529956-khsvspnniq7j3l45qkildh8mu0nl852d.apps.googleusercontent.com',
-    //   'responseType': 'code',
-    //   'accessType': 'offline',
-    //   'redirect_uri': 'http://localhost:8080/api/gapi/photos',
-    //   'scope': SCOPE
-    // }).then(function () {
-    //   window.GoogleAuth = window.gapi.auth2.getAuthInstance();
-    // });
-
-    window.gapi.auth2.init({
-      client_id: '537652529956-khsvspnniq7j3l45qkildh8mu0nl852d.apps.googleusercontent.com',
-      scope: SCOPE
-    }).then(data => {
-      console.log('auth2:', data);
-      window.GoogleAuth = window.gapi.auth2.getAuthInstance();
-    });
-  }
-
-  signInToGoogle() {
-    if (!window.GoogleAuth) return;
-
-    if (window.GoogleAuth.isSignedIn.get()) {
-      // User is authorized and has clicked 'Sign out' button.
-      window.GoogleAuth.signOut();
-    } else {
-      // User is not signed in. Start Google auth flow.
-      window.GoogleAuth.signIn().then(data => {
-        const token = window.gapi.auth.getToken();
-        // this.props.gapiToken(token.id_token, token.access_token);
-      });
-    }
-  }
-
-  revokeGapi() {
-    (window.GoogleAuth) ? window.GoogleAuth.disconnect() : null;
-  }
-
-  getPhotosList(){
-    this.props.getPhotosList().then(data=>console.log('...photos ', data))
-  }
-
-  getGapiCode() {
-    let self = this;
-    window.GoogleAuth.grantOfflineAccess({
-      scope: SCOPE
-    }).then(data => {
-      self.props.postGapiCode(data.code).then(data => console.log('..resp:', data));
-    });
+  loginToGoogle() {
+    this.props.getGoogleLogin().then(data => window.location.replace(data.value.data));
   }
 
   render() {
@@ -100,9 +45,7 @@ export class Home extends React.Component<IHomeProp> {
             <Translate contentKey="home.subtitle">This is your homepage</Translate>
           </p>
           <div>
-            <button id="gapi-signin" onClick={this.signInToGoogle}>Sign in/out of Google</button>
-            <button id="gapi-revoke" onClick={this.revokeGapi}>Revoke Google perms</button>
-            <button id="gapi-code" onClick={this.getGapiCode}>Get Access Code</button>
+            <button id="google-login" onClick={this.loginToGoogle}>Login to Google</button>
             <button id="gapi-code" onClick={this.getPhotosList}>Get Photos List</button>
           </div>
 
@@ -130,7 +73,6 @@ export class Home extends React.Component<IHomeProp> {
              </div>
            )}
 
-
           <p>
             <Translate contentKey="home.question">If you have any question on JHipster:</Translate>
           </p>
@@ -145,7 +87,7 @@ const mapStateToProps = storeState => ({
   isAuthenticated: storeState.authentication.isAuthenticated
 });
 
-const mapDispatchToProps = { getSession, postGapiCode, getPhotosList };
+const mapDispatchToProps = { getSession, getPhotosList, getGoogleLogin };
 
 type StateProps = ReturnType<typeof mapStateToProps>;
 type DispatchProps = typeof mapDispatchToProps;

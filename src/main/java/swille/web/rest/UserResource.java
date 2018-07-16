@@ -32,6 +32,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import io.github.jhipster.web.util.ResponseUtil;
 import swille.config.Constants;
 import swille.security.AuthoritiesConstants;
@@ -75,6 +78,7 @@ public class UserResource {
     public UserResource(UserService userService) {
         this.userService = userService;
     }
+
 
     /**
      * GET /users : get all users.
