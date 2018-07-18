@@ -16,6 +16,7 @@ import { hasAnyAuthority } from 'app/shared/auth/private-route';
 import ErrorBoundary from 'app/shared/error/error-boundary';
 import { AUTHORITIES } from 'app/config/constants';
 import AppRoutes from 'app/routes';
+// import { gapi } from
 
 export interface IAppProps extends StateProps, DispatchProps {}
 
@@ -30,7 +31,9 @@ export class App extends React.Component<IAppProps> {
     return (
       <Router>
         <div className="app-container" style={{ paddingTop }}>
-          <ToastContainer position={toast.POSITION.TOP_LEFT} className="toastify-container" toastClassName="toastify-toast" />
+          <ToastContainer position={toast.POSITION.TOP_LEFT}
+                          className="toastify-container"
+                          toastClassName="toastify-toast"/>
           <ErrorBoundary>
             <Header
               isAuthenticated={this.props.isAuthenticated}
@@ -45,10 +48,10 @@ export class App extends React.Component<IAppProps> {
           <div className="container-fluid view-container" id="app-view-container">
             <Card className="jh-card">
               <ErrorBoundary>
-                <AppRoutes />
+                <AppRoutes/>
               </ErrorBoundary>
             </Card>
-            <Footer />
+            <Footer/>
           </div>
         </div>
       </Router>
@@ -59,7 +62,7 @@ export class App extends React.Component<IAppProps> {
 const mapStateToProps = ({ authentication, applicationProfile, locale }: IRootState) => ({
   currentLocale: locale.currentLocale,
   isAuthenticated: authentication.isAuthenticated,
-  isAdmin: hasAnyAuthority(authentication.account.authorities, [AUTHORITIES.ADMIN]),
+  isAdmin: hasAnyAuthority(authentication.account.authorities, [ AUTHORITIES.ADMIN ]),
   ribbonEnv: applicationProfile.ribbonEnv,
   isInProduction: applicationProfile.inProduction,
   isSwaggerEnabled: applicationProfile.isSwaggerEnabled

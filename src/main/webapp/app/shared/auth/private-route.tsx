@@ -4,6 +4,7 @@ import { Route, Redirect, RouteProps } from 'react-router-dom';
 import { Translate } from 'react-jhipster';
 import { IRootState } from 'app/shared/reducers';
 import ErrorBoundary from 'app/shared/error/error-boundary';
+import deburr = require('lodash/fp/deburr');
 
 interface IOwnProps {
   hasAnyAuthorities?: string[];
@@ -18,35 +19,39 @@ export const PrivateRouteComponent = ({
   hasAnyAuthorities = [],
   ...rest
 }: IPrivateRouteProps) => {
-  const checkAuthorities = props =>
-    isAuthorized ? (
+
+  const checkAuthorities = props => {
+    console.log('check auth ', props);
+    return isAuthorized ? (
       <ErrorBoundary>
         <Component {...props} />
       </ErrorBoundary>
     ) : (
-      <div className="insufficient-authority">
-        <div className="alert alert-danger">
-          <Translate contentKey="error.http.403">You are not authorized to access this page.</Translate>
-        </div>
-      </div>
-    );
+             <div className="insufficient-authority">
+               <div className="alert alert-danger">
+                 <Translate contentKey="error.http.403">You are not authorized to access this page.</Translate>
+               </div>
+             </div>
+           )
+  };
 
-  const renderRedirect = props =>
-    isAuthenticated ? (
+  const renderRedirect = props => {
+    return isAuthenticated ? (
       checkAuthorities(props)
     ) : (
-      <Redirect
-        to={{
-          pathname: '/login',
-          search: props.location.search,
-          state: { from: props.location }
-        }}
-      />
-    );
+             <Redirect
+               to={{
+                 pathname: '/login',
+                 search: props.location.search,
+                 state: { from: props.location}
+               }}
+             />
+           );
+  };
 
   if (!Component) throw new Error(`A component needs to be specified for private route for path ${(rest as any).path}`);
 
-  return <Route {...rest} render={renderRedirect} />;
+  return <Route {...rest} render={renderRedirect}/>;
 };
 
 export const hasAnyAuthority = (authorities: string[], hasAnyAuthorities: string[]) => {
@@ -59,9 +64,11 @@ export const hasAnyAuthority = (authorities: string[], hasAnyAuthorities: string
   return false;
 };
 
-const mapStateToProps = ({ authentication: { isAuthenticated, account } }: IRootState, { hasAnyAuthorities = [] }: IOwnProps) => ({
+const mapStateToProps = (
+  { authentication: { isAuthenticated, account } }: IRootState,
+  { hasAnyAuthorities = [] }: IOwnProps) => ({
   isAuthenticated,
-  isAuthorized: hasAnyAuthority(account.authorities, hasAnyAuthorities)
+  isAuthorized: hasAnyAuthority(account.authorities, hasAnyAuthorities),
 });
 
 type StateProps = ReturnType<typeof mapStateToProps>;

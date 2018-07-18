@@ -4,7 +4,6 @@ import { FAILURE, REQUEST, SUCCESS } from 'app/shared/reducers/action-type.util'
 
 export const ACTION_TYPES = {
   GET_GOOOGLE_AUTH: 'administration/GET_GOOOGLE_AUTH',
-  GET_PHOTOS_LIST: 'administration/GET_PHOTOS_LIST',
   FETCH_GATEWAY_ROUTE: 'administration/FETCH_GATEWAY_ROUTE',
   FETCH_LOGS: 'administration/FETCH_LOGS',
   FETCH_LOGS_CHANGE_LEVEL: 'administration/FETCH_LOGS_CHANGE_LEVEL',
@@ -43,7 +42,6 @@ export type AdministrationState = Readonly<typeof initialState>;
 export default (state: AdministrationState = initialState, action): AdministrationState => {
   switch (action.type) {
     case REQUEST(ACTION_TYPES.GET_GOOOGLE_AUTH):
-    case REQUEST(ACTION_TYPES.GET_PHOTOS_LIST):
     case REQUEST(ACTION_TYPES.FETCH_GATEWAY_ROUTE):
     case REQUEST(ACTION_TYPES.FETCH_METRICS):
       return {
@@ -143,13 +141,9 @@ export default (state: AdministrationState = initialState, action): Administrati
       return state;
   }
 };
-export const getGoogleLogin = ()=>({
-  type:ACTION_TYPES.GET_GOOOGLE_AUTH,
-  payload:axios.get("/gapi/authorize")
-})
-export const getPhotosList = () => ({
-  type: ACTION_TYPES.GET_PHOTOS_LIST,
-  payload: axios.get('/gapi/photos/list')
+export const getGoogleLogin = () => ({
+  type: ACTION_TYPES.GET_GOOOGLE_AUTH,
+  payload: axios.get('/gapi/authorize')
 });
 
 // Actions

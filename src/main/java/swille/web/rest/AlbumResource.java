@@ -1,21 +1,29 @@
 package swille.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
+
+import io.github.jhipster.web.util.ResponseUtil;
 import swille.domain.Album;
 import swille.repository.AlbumRepository;
 import swille.web.rest.errors.BadRequestAlertException;
 import swille.web.rest.util.HeaderUtil;
-import io.github.jhipster.web.util.ResponseUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * REST controller for managing Album.
@@ -38,7 +46,8 @@ public class AlbumResource {
      * POST  /albums : Create a new album.
      *
      * @param album the album to create
-     * @return the ResponseEntity with status 201 (Created) and with body the new album, or with status 400 (Bad Request) if the album has already an ID
+     * @return the ResponseEntity with status 201 (Created) and with body the new album, or with status 400 (Bad
+     * Request) if the album has already an ID
      * @throws URISyntaxException if the Location URI syntax is incorrect
      */
     @PostMapping("/albums")
@@ -48,11 +57,21 @@ public class AlbumResource {
         if (album.getId() != null) {
             throw new BadRequestAlertException("A new album cannot already have an ID", ENTITY_NAME, "idexists");
         }
+
         Album result = albumRepository.save(album);
         return ResponseEntity.created(new URI("/api/albums/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
+
+    // TODO: 7/17/18 update users 'album' field
+    /* POST
+     *
+     * get user by id,
+     * get albums by id
+     * if null, push new album id
+     * else do nothing */
+
 
     /**
      * PUT  /albums : Updates an existing album.
@@ -75,6 +94,7 @@ public class AlbumResource {
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, album.getId().toString()))
             .body(result);
     }
+
 
     /**
      * GET  /albums : get all the albums.
@@ -116,4 +136,11 @@ public class AlbumResource {
         albumRepository.deleteById(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id)).build();
     }
+    // TODO: 7/17/18 delete album from users's 'album' field
+    /* DELETE
+     *
+     * get user by id,
+     * get albums by id
+     * if not null, remove album id
+     * else do nothing */
 }

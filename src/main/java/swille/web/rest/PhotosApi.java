@@ -11,6 +11,7 @@ import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.photoslibrary.v1.PhotosLibrary;
 import com.google.api.services.photoslibrary.v1.model.MediaItem;
+import com.google.api.services.photoslibrary.v1.model.Photo;
 import com.google.api.services.photoslibrary.v1.model.SearchMediaItemsRequest;
 import com.google.api.services.photoslibrary.v1.model.SearchMediaItemsResponse;
 
@@ -31,10 +32,13 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -77,17 +81,28 @@ public class PhotosApi {
     }
 
     @GetMapping("/auth/code")
-    public RedirectView exchangeCodeForAccessToken(@RequestParam String code) throws Exception {
+    public void exchangeCodeForAccessToken(@RequestParam String code, final HttpServletResponse response)
+    throws Exception {
         /** oauth callback uri handler;
          * Sets access_token on Credentail */
         gapiUtility.createGoogleCredentail(code, new GoogleTokenResponse());
-
-        return new RedirectView("http://localhost:8080");
+        response.addCookie(new Cookie("gauthorized", "true"));
+        response.sendRedirect(response.encodeRedirectURL("/"));
+//        return new RedirectView("http://localhost:8080/");
     }
 
 
+    @GetMapping("/profile")
+    public String getProfile() {
+
+        return "profile";
+    }
+
     @GetMapping("/photos/list")
-    public String getGPhotosList() throws Exception {
+    @ResponseBody
+    public ResponseEntity getGPhotosList() throws Exception {
+        if (gapiUtility.getCredential() == null) { return ResponseEntity.ok().body(null); }
+
         SearchMediaItemsRequest searchMediaItemsRequest = new SearchMediaItemsRequest();
 
         PhotosLibrary photosLibrary = new PhotosLibrary.Builder(
@@ -101,8 +116,13 @@ public class PhotosApi {
             .search(searchMediaItemsRequest)
             .execute();
 
-        List<MediaItem> photos = items.getMediaItems();
+        List<swille.domain.Photo> photos = items.getMediaItems().stream().map(item -> {
+            swille.domain.Photo photo = new swille.domain.Photo();
+            photo.setId(item.getId());
+            photo.setUri(item.getBaseUrl());
+            return photo;
+        }).collect(Collectors.toList());
 
-        return "photos list length: " + photos.size();
+        return ResponseEntity.ok().body(photos);
     }
 }

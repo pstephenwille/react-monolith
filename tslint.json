@@ -113,7 +113,7 @@
     "no-arg": true,
     "no-bitwise": false,
     "no-console": [
-      true,
+      false,
       "log",
       "debug",
       "info",

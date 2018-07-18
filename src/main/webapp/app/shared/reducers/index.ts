@@ -11,7 +11,13 @@ import userManagement, { UserManagementState } from './user-management';
 import album, {
   AlbumState
 } from 'app/entities/album/album.reducer';
+// prettier-ignore
+import photos, {
+  PhotosState
+} from 'app/entities/photos/photos.reducer';
 /* jhipster-needle-add-reducer-import - JHipster will add reducer here */
+
+import gapi, { GapiState } from '../gapi/gapi';
 
 export interface IRootState {
   readonly authentication: AuthenticationState;
@@ -20,6 +26,8 @@ export interface IRootState {
   readonly administration: AdministrationState;
   readonly userManagement: UserManagementState;
   readonly album: AlbumState;
+  readonly photos: PhotosState;
+  readonly gapi: GapiState;
   /* jhipster-needle-add-reducer-type - JHipster will add reducer type here */
   readonly loadingBar: any;
 }
@@ -31,8 +39,10 @@ const rootReducer = combineReducers<IRootState>({
   administration,
   userManagement,
   album,
+  photos,
   /* jhipster-needle-add-reducer-combine - JHipster will add reducer here */
-  loadingBar
+  loadingBar,
+  gapi
 });
 
 export default rootReducer;

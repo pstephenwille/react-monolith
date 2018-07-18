@@ -5,6 +5,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -23,6 +25,9 @@ public class Album implements Serializable {
 
     @Field("display_order")
     private Integer displayOrder;
+
+    @Field("photos")
+    private List<Photo> photosList = new ArrayList<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public String getId() {
@@ -60,6 +65,14 @@ public class Album implements Serializable {
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
+    public List<Photo> getPhotosList() {
+        return photosList;
+    }
+
+    public void setPhotosList(List<Photo> photosList) {
+        this.photosList = photosList;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -83,9 +96,9 @@ public class Album implements Serializable {
     @Override
     public String toString() {
         return "Album{" +
-            "id=" + getId() +
-            ", name='" + getName() + "'" +
-            ", displayOrder=" + getDisplayOrder() +
-            "}";
+               "id=" + getId() +
+               ", name='" + getName() + "'" +
+               ", displayOrder=" + getDisplayOrder() +
+               "}";
     }
 }

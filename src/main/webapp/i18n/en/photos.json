@@ -1,0 +1,25 @@
+
+{
+    "reactMonolithApp": {
+        "photos" : {
+            "home": {
+                "title": "Photos",
+                "createLabel": "Create a new Photos",
+                "createOrEditLabel": "Create or edit a Photos"
+            },
+            "created": "A new Photos is created with identifier {{ param }}",
+            "updated": "A Photos is updated with identifier {{ param }}",
+            "deleted": "A Photos is deleted with identifier {{ param }}",
+            "delete": {
+                "question": "Are you sure you want to delete Photos {{ id }}?"
+            },
+            "detail": {
+                "title": "Photos"
+            },
+            "name": "Name",
+            "uri": "Uri",
+            "text": "Text",
+            "album": "Album"
+        }
+    }
+}

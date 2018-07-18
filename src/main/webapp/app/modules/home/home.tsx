@@ -6,7 +6,9 @@ import { connect } from 'react-redux';
 import { Alert, Col, Row } from 'reactstrap';
 import { getSession } from 'app/shared/reducers/authentication';
 import { getLoginUrl } from 'app/shared/util/url-utils';
-import { getPhotosList, getGoogleLogin } from '../administration/administration.reducer'
+import { getGoogleLogin } from '../administration/administration.reducer';
+import { getPhotoList } from 'app/shared/gapi/gapi';
+import divide = require('lodash/fp/divide');
 
 export interface IHomeProp extends StateProps, DispatchProps {}
 
@@ -17,16 +19,14 @@ const SCOPE = 'profile email https://www.googleapis.com/auth/photoslibrary';
 export class Home extends React.Component<IHomeProp> {
   constructor() {
     super();
-    this.getPhotosList = this.getPhotosList.bind(this);
+    // this.getPhotoList = this.getPhotoList.bind(this);
     this.loginToGoogle = this.loginToGoogle.bind(this);
+    // this.getPhotoList = this.getPhotoList.bind(this);
   }
 
   componentDidMount() {
     this.props.getSession();
-  }
-
-  getPhotosList() {
-    this.props.getPhotosList().then(data => console.log('...photos ', data))
+    this.props.getPhotoList();
   }
 
   loginToGoogle() {
@@ -34,7 +34,8 @@ export class Home extends React.Component<IHomeProp> {
   }
 
   render() {
-    const { account } = this.props;
+    const { account, photoList } = this.props;
+
     return (
       <Row>
         <Col md="9">
@@ -46,10 +47,11 @@ export class Home extends React.Component<IHomeProp> {
           </p>
           <div>
             <button id="google-login" onClick={this.loginToGoogle}>Login to Google</button>
-            <button id="gapi-code" onClick={this.getPhotosList}>Get Photos List</button>
+            <button id="gapi-code" onClick={this.getPhotoList}>Get Photos List</button>
           </div>
 
           {account && account.login ? (
+
             <div>
               <Alert color="success">
                 <Translate contentKey="home.logged.message" interpolate={{ username: account.login }}>
@@ -57,6 +59,7 @@ export class Home extends React.Component<IHomeProp> {
                 </Translate>
               </Alert>
             </div>
+
           ) : (
              <div>
                <Alert color="warning">
@@ -73,6 +76,17 @@ export class Home extends React.Component<IHomeProp> {
              </div>
            )}
 
+          {photoList.length ? (
+            <article>
+              <h1>Google Photos</h1>
+              <div>
+                {photoList.map(photo =>
+                  <img src={photo.uri} width="200" />)}
+              </div>
+            </article>
+          ) : (
+             <p>no photos</p>
+           )}
           <p>
             <Translate contentKey="home.question">If you have any question on JHipster:</Translate>
           </p>
@@ -84,10 +98,11 @@ export class Home extends React.Component<IHomeProp> {
 
 const mapStateToProps = storeState => ({
   account: storeState.authentication.account,
-  isAuthenticated: storeState.authentication.isAuthenticated
+  isAuthenticated: storeState.authentication.isAuthenticated,
+  photoList: storeState.gapi.photoList
 });
 
-const mapDispatchToProps = { getSession, getPhotosList, getGoogleLogin };
+const mapDispatchToProps = { getSession, getPhotoList, getGoogleLogin };
 
 type StateProps = ReturnType<typeof mapStateToProps>;
 type DispatchProps = typeof mapDispatchToProps;
